@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Button from "@/components/ui/Button";
-import { createProductAction } from "./actions";
+import { createProductAction } from "../actions";
 
 const initialState = { ok: false, message: "" };
 

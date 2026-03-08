@@ -36,7 +36,7 @@ export async function createStockIn(lines: TxLineInput[]) {
 }
 
 export async function createStockOut(lines: TxLineInput[]) {
-  const supabase = getSupabaseServer();
+  const supabase = await getSupabaseServer();
 
   const p_lines = cleanLines(lines);
 

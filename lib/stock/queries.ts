@@ -19,7 +19,7 @@ export async function fetchMovements(params: {
   to?: string;   // yyyy-mm-dd
   limit?: number;
 }) {
-  const supabase = getSupabaseServer();
+  const supabase = await getSupabaseServer();
 
   let q = supabase
     .from("stock_tx")
