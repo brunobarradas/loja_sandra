@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { getAppSettings } from "@/lib/app-settings";
-import { formatMoney } from "@/utils/money";
+import { kz } from "@/utils/money";
 
 type ProductRow = {
   id: string;
@@ -74,7 +73,6 @@ async function createStockInAction(formData: FormData) {
 
 export default async function StockInPage() {
   const supabase = await getSupabaseServer();
-  const settings = await getAppSettings();
 
   const {
     data: { user },
@@ -245,10 +243,7 @@ export default async function StockInPage() {
                       </td>
 
                       <td className="px-4 py-4 text-sm text-slate-700">
-                        {formatMoney(
-                          Number(product.base_price ?? 0),
-                          settings.currency_code
-                        )}
+                        {kz(Number(product.base_price ?? 0))}
                       </td>
 
                       <td className="rounded-r-2xl px-4 py-4 text-sm text-slate-700">

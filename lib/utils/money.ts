@@ -7,3 +7,4 @@ export function kz(value: number) {
     minimumFractionDigits: 2,
   }).format(Number.isFinite(n) ? n : 0);
 }
+
