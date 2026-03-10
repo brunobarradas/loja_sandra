@@ -61,12 +61,12 @@ export default async function ProductsPage() {
               Novo produto
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Adiciona ou altera um produto do catálogo.
+              Adiciona um produto ao catálogo.
             </p>
           </div>
 
           <div className="mt-6">
-            <ProductCreateForm products={products ?? []} />
+            <ProductCreateForm />
           </div>
         </article>
 
