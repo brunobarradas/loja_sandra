@@ -15,10 +15,12 @@ type ProductRow = {
 };
 
 function kz(value: number) {
-  return new Intl.NumberFormat("pt-PT", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value) + " Kz";
+  return (
+    new Intl.NumberFormat("pt-PT", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value) + " Kz"
+  );
 }
 
 function formatDateTimePT(value: Date) {
@@ -40,10 +42,21 @@ export async function GET() {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single<{ role: "admin" | "employee" | null }>();
+
+  if (profile?.role !== "admin") {
+    return NextResponse.json({ error: "Sem permissão." }, { status: 403 });
+  }
+
   const { data: products, error } = await supabase
     .from("products")
     .select("id,name,stock,base_price,active")
     .eq("active", true)
+    .gt("stock", 0)
     .order("name", { ascending: true })
     .returns<ProductRow[]>();
 
@@ -77,7 +90,7 @@ export async function GET() {
       height: logoSize,
     });
   } catch {
-    // continua sem logo se não conseguir ler
+    // continua sem logo
   }
 
   page.drawText("Relatório de Stock Atual", {
@@ -112,7 +125,20 @@ export async function GET() {
 
   y -= 30;
 
-  // Cabeçalho da tabela
+  const totalEstimated = (products ?? []).reduce((acc, product) => {
+    return acc + Number(product.stock ?? 0) * Number(product.base_price ?? 0);
+  }, 0);
+
+  page.drawText(`Valor total estimado em stock: ${kz(totalEstimated)}`, {
+    x: margin,
+    y,
+    size: 11,
+    font: fontBold,
+    color: rgb(0.1, 0.1, 0.1),
+  });
+
+  y -= 28;
+
   page.drawRectangle({
     x: margin,
     y: y - 6,

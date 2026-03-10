@@ -22,6 +22,14 @@ export default async function StockPage() {
     redirect("/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single<{ role: "admin" | "employee" | null }>();
+
+  const isAdmin = profile?.role === "admin";
+
   const { data: products, error } = await supabase
     .from("products")
     .select("id,name,stock,base_price,active")
@@ -32,6 +40,14 @@ export default async function StockPage() {
   if (error) {
     throw new Error(error.message);
   }
+
+  const totalEstimated = isAdmin
+    ? (products ?? []).reduce((acc, product) => {
+        return (
+          acc + Number(product.stock ?? 0) * Number(product.base_price ?? 0)
+        );
+      }, 0)
+    : 0;
 
   return (
     <main className="space-y-6">
@@ -45,23 +61,38 @@ export default async function StockPage() {
           </p>
         </div>
 
-        <Link
-          href="/api/stock/pdf"
-          target="_blank"
-          className="inline-flex h-11 items-center rounded-full bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-        >
-          Exportar PDF
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/api/stock/pdf"
+            target="_blank"
+            className="inline-flex h-11 items-center rounded-full bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          >
+            Exportar PDF
+          </Link>
+        )}
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-900">
-            Stock atual
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Produtos: {products?.length ?? 0}
-          </p>
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Stock atual
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Produtos: {products?.length ?? 0}
+            </p>
+          </div>
+
+          {isAdmin && (
+            <div className="rounded-2xl bg-slate-100 px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Valor total em stock
+              </p>
+              <p className="mt-1 text-lg font-semibold text-slate-900">
+                {kz(totalEstimated)}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 overflow-x-auto">
